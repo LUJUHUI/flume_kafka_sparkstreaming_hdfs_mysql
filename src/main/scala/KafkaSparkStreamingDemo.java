@@ -15,7 +15,7 @@ import scala.Tuple2;
 public class KafkaSparkStreamingDemo {
 	public static void main(String[] args) throws InterruptedException {
 		SparkConf conf = new SparkConf().setAppName("kafkaSpark").setMaster("local[*]");
-		JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Seconds.apply(5));
+		JavaStreamingContext streamingContext = new JavaStreamingContext(conf, Seconds.apply(5)); //每5秒统计一次
 
 		Map<String, Object> kafkaParams = new HashMap<>();
 		/*kafka的端口号*/
