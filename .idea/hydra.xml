@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="HydraSettings">
+    <option name="hydraStorePath" value="F:\光环大数据（小康版）\kafka2hdfs\.hydra\idea" />
+    <option name="noOfCores" value="2" />
+    <option name="projectRoot" value="F:\光环大数据（小康版）\kafka2hdfs" />
+    <option name="sourcePartitioner" value="auto" />
+  </component>
+</project>
