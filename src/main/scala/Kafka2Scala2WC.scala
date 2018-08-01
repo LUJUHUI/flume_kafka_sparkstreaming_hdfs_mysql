@@ -36,15 +36,20 @@ object Kafka2Scala2WC {
       PreferConsistent,
       Subscribe[String, String](topics, kafkaParams)
     )
-
+    /*对kafka消费端取出来的数据进行初步处理，获取value值*/
     val lines = data.map(_.value())
-    /*对kafka消费端取出来的数据进行扁平化处理（string，string）-> string*/
+    /*对初步处理的数据进行扁平化处理，并按照空格切分*/
     val words = lines.flatMap(_.split(" "))
+    /*获取的单词作为key值，‘1’作为value值，组成（K，V）对*/
     val wordAndOne = words.map((_, 1))
     val reduced = wordAndOne.reduceByKey(_ + _)
+
+    /*打印结果*/
     reduced.print()
 
+    /*启动sparkstreaming程序*/
     ssc.start()
+    /*等待程序退出*/
     ssc.awaitTermination()
 
   }
