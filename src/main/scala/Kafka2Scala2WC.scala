@@ -53,5 +53,4 @@ object Kafka2Scala2WC {
     ssc.awaitTermination()
 
   }
-
 }
