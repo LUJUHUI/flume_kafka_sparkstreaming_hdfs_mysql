@@ -1,3 +1,5 @@
+package test;
+
 import java.util.*;
 import org.apache.spark.SparkConf;
 import org.apache.spark.TaskContext;
