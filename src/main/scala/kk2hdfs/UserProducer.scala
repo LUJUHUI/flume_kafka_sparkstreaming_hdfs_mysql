@@ -24,7 +24,7 @@ object UserProducer {
       * 3537982273,1491560444 395798035 2036380346 899375619 3534826887 3427911581 494959696
       * 823183725,1484954627 1950387873 1652977611 4185960823 427135664 3046862298 3536710376
       */
-    Source.fromFile(new File("E:\\Projects\\kafka_user\\src\\main\\resources\\my_friends.csv")).getLines().foreach(line => {
+    Source.fromFile(new File("E:/kafka_user/src/main/resources/my_friends.csv")).getLines().foreach(line => {
       val record = new ProducerRecord[String, String]("user_friend", line.toString);
       println(line)
       Thread.sleep(2)

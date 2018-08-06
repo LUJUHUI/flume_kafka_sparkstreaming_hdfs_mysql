@@ -11,7 +11,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
   * @ author: create by LuJuHui
   * @ date:2018/7/31
   */
-object Kafka2Scala2HDFS {
+object Kafka2Scala2HDFS{
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf().setAppName("Kafka2Scala2HDFS").setMaster("local[3]") //local[3]指的是在本地运行，启动3个进程
     val ssc = new StreamingContext(conf, Seconds(5)) //每5秒钟统计一次数据
