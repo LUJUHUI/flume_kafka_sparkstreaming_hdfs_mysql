@@ -7,7 +7,7 @@ package meituan.session
 
 import meituan.constant.Constants
 import meituan.dao.factory.DAOFactory
-import meituan.utils.ParamUtils
+import meituan.utils.{ParamUtils, StringUtils}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.{DataFrame, Row, SparkSession}
 
@@ -184,7 +184,7 @@ object UserVisitSessionAnalyzeSpark {
 			listRDD
 		}
 
-		/**5.2 分别求出点击的、下单的、支付的品类，并求出次数   k:categoryid v:count*/
+		/** 5.2 分别求出点击的、下单的、支付的品类，并求出次数   k:categoryid v:count */
 
 		/*===================5.1.1 获取点击品类的次数==========begin==========================================*/
 		val clickCategoryid2CountRDD: RDD[(Long, Long)] = getclickCategoryid2CountRDD(sessionid_rows_rdd)
@@ -212,13 +212,13 @@ object UserVisitSessionAnalyzeSpark {
 
 		/*===================5.1.2 获取下单品类的次数===========begin=======================================*/
 		/**
-		* 思路：
-		* 定义一个getorderCategoryid2CountRDD函数，
-		* 其参数为清洗之后的sessionid_rows_rdd，
-		* 参数类型为 RDD[(Long, Iterable[Row])])，
-		* 返回类型为 RDD[(Long, Long)]
-		*
-		* */
+			* 思路：
+			* 定义一个getorderCategoryid2CountRDD函数，
+			* 其参数为清洗之后的sessionid_rows_rdd，
+			* 参数类型为 RDD[(Long, Iterable[Row])])，
+			* 返回类型为 RDD[(Long, Long)]
+			*
+			**/
 		val orderCategoryid2CountRDD: RDD[(Long, Long)] = getorderCategoryid2CountRDD(sessionid_rows_rdd)
 
 		def getorderCategoryid2CountRDD(sessionid_rows_rdd: RDD[(Long, Iterable[Row])]): RDD[(Long, Long)] = {
@@ -234,7 +234,7 @@ object UserVisitSessionAnalyzeSpark {
 				list //返回list
 			}).filter(tuple => { //对返回的list进行筛选 list[(long,ROW)]
 				val row: Row = tuple._2 //将ROW赋值给row，其中tuple的形式为tuple[(Long,ROW)]=[session_id,(date,user_id,....,pay_product_id)]
-			val rowStr: String = row.getString(9) //偏移量为9，对应ROW中的字段为order_catagory_id
+			  val rowStr: String = row.getString(9) //偏移量为9，对应ROW中的字段为order_catagory_id
 				if (row.getString(9) != null) true else false //判断字段order_catagory_id是否为空
 			}).flatMap(tuple => { //对返回的list进行扁平化处理
 				val row: Row = tuple._2
@@ -279,6 +279,7 @@ object UserVisitSessionAnalyzeSpark {
 		}
 		/*===================5.1.3 获取支付品类的次数===========end=====================================*/
 
+		/*===================5.2 对四个结果进行join===========begin=====================================*/
 		/**
 			* @ Date: 2018/8/16
 			* @ Param: allCategoryidRDD   总的品类
@@ -287,18 +288,19 @@ object UserVisitSessionAnalyzeSpark {
 			* @ Param: payCategoryid2CountRDD     支付品类出现的次数
 			*/
 
-		val joinCategoryandData: RDD[(Long, String)] = joinCategoryAndData(allCategoryidRDD,clickCategoryid2CountRDD,orderCategoryid2CountRDD,payCategoryid2CountRDD)
+		val joinCategoryandData: RDD[(Long, String)] = joinCategoryAndData(allCategoryidRDD, clickCategoryid2CountRDD, orderCategoryid2CountRDD, payCategoryid2CountRDD)
+
 		def joinCategoryAndData(allCategoryidRDD: RDD[(Long, Long)],
 		                        clickCategoryid2CountRDD: RDD[(Long, Long)],
 		                        orderCategoryid2CountRDD: RDD[(Long, Long)],
 		                        payCategoryid2CountRDD: RDD[(Long, Long)]): RDD[(Long, String)] = {
 			/**
-			* (categoryid,categoryid) leftjoin (clickCategoryid,count)
-			* (Long,     (Long, Option[Long]))  是一个tuple元组  其中Option是为了避免使用null或空值
-			* (categoryid,   (categoryid, count))  如果count为空，则返回long
-			*
-			* 点击
-			* */
+				* (categoryid,categoryid) leftjoin (clickCategoryid,count)
+				* (Long,     (Long, Option[Long]))  是一个tuple元组  其中Option是为了避免使用null或空值
+				* (categoryid,   (categoryid, count))  如果count为空，则返回long
+				*
+				* 点击
+				**/
 			val tempJoinRDD: RDD[(Long, (Long, Option[Long]))] = allCategoryidRDD.leftOuterJoin(clickCategoryid2CountRDD)
 			val tmpRDD1: RDD[(Long, String)] = tempJoinRDD.map(tuple => {
 				val categoryID: Long = tuple._1
@@ -308,11 +310,11 @@ object UserVisitSessionAnalyzeSpark {
 			})
 
 			/**
-			* (Long, (String, Option[Long]))
-			* categoryid, (value,ordercount)  此处的value是上一个返回值的value
-			*
-			* 下单
-			* */
+				* (Long, (String, Option[Long]))
+				* categoryid, (value,ordercount)  此处的value是上一个返回值的value
+				*
+				* 下单
+				**/
 			val tempJoinRDD1: RDD[(Long, (String, Option[Long]))] = tmpRDD1.leftOuterJoin(orderCategoryid2CountRDD)
 			val tmpRDD2 = tempJoinRDD1.map(tuple => {
 				val categoryID: Long = tuple._1
@@ -323,7 +325,7 @@ object UserVisitSessionAnalyzeSpark {
 			})
 			/**
 				* 支付
-				* */
+				**/
 			val tempJoinRDD2: RDD[(Long, (String, Option[Long]))] = tmpRDD2.leftOuterJoin(payCategoryid2CountRDD)
 			val tmpRDD3: RDD[(Long, String)] = tempJoinRDD2.map(tuple => {
 				val categoryID: Long = tuple._1
@@ -334,6 +336,19 @@ object UserVisitSessionAnalyzeSpark {
 			})
 			tmpRDD3
 		}
+		/*===================5.2 对四个结果进行join===========end=====================================*/
+
+		/**
+			* 二次排序 求出top 10
+			**/
+		joinCategoryandData.map(tuple => {
+			val countInfo: String = tuple._2
+			val clickCount: Int = StringUtils.getFieldFromConcatString(countInfo, "\\|", Constants.FIELD_CLICK_COUNT).toInt
+			val orderCount: Int = StringUtils.getFieldFromConcatString(countInfo, "\\|", Constants.FIELD_ORDER_COUNT).toInt
+			val payCount: Int = StringUtils.getFieldFromConcatString(countInfo, "\\|", Constants.FIELD_PAY_COUNT).toInt
+			val sortKey = new SortKey(clickCount, orderCount, payCount)
+			(sortKey, countInfo) //返回值为(sortKey, countInfo)
+		}).sortBy(_._1, false).take(10) //按照sortKey排序,因为默认为正序排列，所以要设为false才能转换为倒叙排列，取前10即可
 
 
 	}

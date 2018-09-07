@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/kafka_sparkstreaming_hdfs.iml" filepath="$PROJECT_DIR$/kafka_sparkstreaming_hdfs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/kafka2hdfs.iml" filepath="$PROJECT_DIR$/kafka2hdfs.iml" />
     </modules>
   </component>
 </project>

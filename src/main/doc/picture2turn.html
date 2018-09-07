@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <style type="text/css">
+
+        /*去除默认样式*/
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /*设置div*/
+        #outer {
+            width: 520px;
+            height: 333px;
+            /*设置居中*/
+            margin: 50px auto;
+            /*
+             * 设置背景颜色
+             */
+            background-color: greenyellow;
+            /*设置上下内边距*/
+            padding: 10px 0;
+            /*为父元素开启相对定位*/
+            position: relative;
+            /*隐藏溢出的内容*/
+            overflow: hidden;
+        }
+
+        /*设置ul*/
+        #imgList {
+            /*去除项目符号*/
+            list-style: none;
+            /*设置ul的宽度*/
+            width: 2600px;
+            /*开启绝对定位*/
+            position: absolute;
+
+            /*
+             * 通过修改ul的left值，可以切换图片
+             * 	1 0px
+             * 	2 -520px
+             * 	3 -1040px
+             * 	4 -1560px
+             * 	....
+             */
+            left: 0px;
+        }
+
+        /*设置li*/
+        li {
+            /*设置元素浮动*/
+            float: left;
+            /*设置外边距*/
+            margin: 0 10px;
+        }
+
+        /*设置导航按钮*/
+        #nav {
+            /*开启绝对定位*/
+            position: absolute;
+            /*定位*/
+            bottom: 20px;
+
+            /*
+             * #outer 宽度 520px
+             *
+             * #nav 宽度 125px
+             *
+             * 520 - 125 = 395/2 = 197.5
+             */
+            left: 197px;
+
+        }
+
+        #nav a {
+            /*设置a浮动*/
+            float: left;
+            /*设置宽和高*/
+            width: 15px;
+            height: 15px;
+
+            /*设置背景颜色*/
+            background-color: red;
+
+            /*设置外边距*/
+            margin: 0 5px;
+
+            /*设置透明*/
+            opacity: 0.5;
+            filter: alpha(opacity=50);
+        }
+
+
+    </style>
+</head>
+<body>
+
+<!--
+    创建一个div作为容器
+-->
+<div id="outer">
+
+    <!--创建一个ul，用来保存图片-->
+    <ul id="imgList">
+        <li><img src="img/1.jpg"/></li>
+        <li><img src="img/2.jpg"/></li>
+        <li><img src="img/3.jpg"/></li>
+        <li><img src="img/4.jpg"/></li>
+        <li><img src="img/5.jpg"/></li>
+    </ul>
+
+    <!--创建一个div来放导航按钮-->
+    <div id="nav">
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+    </div>
+
+</div>
+
+</body>
+</html>

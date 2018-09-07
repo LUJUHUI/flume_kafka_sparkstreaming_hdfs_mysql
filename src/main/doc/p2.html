@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>picture2turn</title>
+    <style type="text/css">
+
+        /*去除默认样式*/
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        /*设置div*/
+        #outer {
+            width: 520px;
+            height: 333px;
+            /*设置居中*/
+            margin: 50px auto;
+            /*
+             * 设置背景颜色
+             */
+            background-color: greenyellow;
+            /*设置上下内边距*/
+            padding: 10px 0;
+            /*为父元素开启相对定位*/
+            position: relative;
+            /*隐藏溢出的内容*/
+            overflow: hidden;
+        }
+
+        /*设置ul*/
+        #imgList {
+            /*去除项目符号*/
+            list-style: none;
+            /*设置ul的宽度*/
+            width: 2600px;
+            /*开启绝对定位*/
+            position: absolute;
+
+            /*
+             * 通过修改ul的left值，可以切换图片
+             * 	1 0px
+             * 	2 -520px
+             * 	3 -1040px
+             * 	4 -1560px
+             * 	....
+             */
+            left: 0px;
+        }
+
+        /*设置li*/
+        li {
+            /*设置元素浮动*/
+            float: left;
+            /*设置外边距*/
+            margin: 0 10px;
+        }
+
+        /*设置导航按钮*/
+        #nav {
+            /*开启绝对定位*/
+            position: absolute;
+            /*定位*/
+            bottom: 20px;
+
+            /*
+             * #outer 宽度 520px
+             *
+             * #nav 宽度 125px
+             *
+             * 520 - 125 = 395/2 = 197.5
+             */
+            left: 197px;
+        }
+
+        #nav a {
+            /*设置a浮动*/
+            float: left;
+            /*设置宽和高*/
+            width: 15px;
+            height: 15px;
+
+            /*设置背景颜色*/
+            background-color: red;
+
+            /*设置外边距*/
+            margin: 0 5px;
+
+            /*设置透明*/
+            opacity: 0.5;
+            filter: alpha(opacity=50);
+        }
+
+        #nav a:hover {
+            background-color: black;
+        }
+
+
+    </style>
+
+    <script type="text/javascript" src="js/tools.js"></script>
+
+    <script type="text/javascript">
+
+        window.onload = function () {
+
+            //获取id为imgList的ul
+            var imgList = document.getElementById("imgList");
+            //获取所有的图片标签
+            var imgs = document.getElementsByTagName("img");
+            //设置ul的宽度
+            imgList.style.width = 520 * imgs.length + "px";
+
+
+            //设置导航按钮居中
+            //获取id为outer的div
+            var outer = document.getElementById("outer");
+            //获取id为nav的div
+            var nav = document.getElementById("nav");
+
+            nav.style.left = (outer.offsetWidth - nav.offsetWidth) / 2 + "px";
+
+
+            //创建一个变量，来保存当前显示图片的索引
+            var index = 0;
+
+            //获取所有的超链接
+            var links = document.getElementsByTagName("a");
+
+            //设置对应的超链接变成选中状态
+            links[index].style.backgroundColor = "black";
+
+            //开启自动切换图片
+            autoChange();
+
+
+            /*
+             * 点击超链接切换到对应的图片
+             * 	点击第一个超链接，切换到第一个图片
+             *  点击第二个超链接，切换到第二个图片
+             */
+
+            //为所有的超链接绑定单击响应函数
+            for (var i = 0; i < links.length; i++) {
+
+                //在超链接中添加一个属性
+                links[i].num = i;
+
+                links[i].onclick = function () {
+
+                    //当切换图片时，为了不受自动切换的影响需要将其关闭
+                    clearInterval(autoTimer);
+
+                    //获取到当前点击的超链接的索引
+                    //更新当前图片的索引
+                    index = this.num;
+
+                    //切换到对应的图片
+                    /*
+                     * 切换图片，就是修改imgList的left属性值
+                     * 	0  0*-520
+                     * 	1  1*-520
+                     * 	4  4*-520
+                     */
+                    //imgList.style.left = -520*index + "px";
+                    //设置过渡效果
+                    move(imgList, "left", -520 * index, 20, function () {
+                        //图片切换完毕，打开自动切换
+                        autoChange();
+                    });
+
+                    setA();
+                };
+            }
+
+            //定义一个变量，保存自动切换图片的定时器
+            var autoTimer;
+
+            /*
+             * 定义一个函数，专门用来自动切换图片
+             */
+            function autoChange() {
+
+                //开启一个定时器，来负责图片的切换
+                autoTimer = setInterval(function () {
+
+                    //索引自增
+                    index++;
+
+                    //判断index值是否合法
+                    index = index % imgs.length;
+
+
+                    //切换图片
+                    move(imgList, "left", -520 * index, 20, function () {
+                        //动画执行完毕，切换导航点
+                        setA();
+                    });
+
+                }, 3000);
+
+            }
+
+
+            /*
+             * 函数专门用来设置超链接的选中状态的
+             */
+            function setA() {
+
+                /*
+                 * 因为最后一张图片和第一张是一样的，所以当显示的图片是最后一张时，应该是第一个的超链接变颜色
+                 */
+                if (index >= imgs.length - 1) {
+                    index = 0;
+
+                    //已经切换到最后一张，瞬间将其切换到第一张
+                    imgList.style.left = 0;
+
+                }
+
+                /*遍历超链接*/
+                for (var i = 0; i < links.length; i++) {
+                    //将所有的超链接的背景颜色都设置为红色
+                    links[i].style.backgroundColor = "";
+                }
+
+                //将当前选中的超链接设置为黑色
+                links[index].style.backgroundColor = "black";
+
+            }
+
+
+        };
+
+
+    </script>
+
+</head>
+<body>
+
+<!-- 创建一个div作为容器 -->
+<div id="outer">
+
+    <!--创建一个ul，用来保存图片-->
+    <ul id="imgList">
+        <li><img src="img/1.jpg"/></li>
+        <li><img src="img/2.jpg"/></li>
+        <li><img src="img/3.jpg"/></li>
+        <li><img src="img/4.jpg"/></li>
+        <li><img src="img/5.jpg"/></li>
+        <li><img src="img/1.jpg"/></li>
+    </ul>
+
+    <!--创建一个div来放导航按钮-->
+    <div id="nav">
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+        <a href="javascript:;"></a>
+    </div>
+
+</div>
+
+</body>
+</html>
